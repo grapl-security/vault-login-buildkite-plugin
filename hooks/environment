@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# shellcheck source-path=SCRIPTDIR
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/vault.sh"
+
+# Our roles in Vault map to our queue names. We need to tweak it a
+# bit, though, in order to obey Vault's naming rules.
+aws_auth_role() {
+    tr '/' '-' <<< "${BUILDKITE_AGENT_META_DATA_QUEUE}"
+}
+
+# Resolve Vault address
+########################################################################
+if [ -n "${BUILDKITE_PLUGIN_VAULT_LOGIN_ADDRESS:-}" ]; then
+    VAULT_ADDR="${BUILDKITE_PLUGIN_VAULT_LOGIN_ADDRESS}"
+    export VAULT_ADDR
+fi
+if [ -z "${VAULT_ADDR:-}" ]; then
+    echo "--- :skull_and_crossbones: Could not find 'VAULT_ADDR' in the environment, and 'BUILDKITE_PLUGIN_VAULT_LOGIN_ADDRESS' was not specified!"
+    exit 1
+fi
+
+# Resolve Vault namespace
+########################################################################
+if [ -n "${BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE:-}" ]; then
+    VAULT_NAMESPACE="${BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE}"
+    export VAULT_NAMESPACE
+fi
+if [ -z "${VAULT_NAMESPACE:-}" ]; then
+    echo "--- :skull_and_crossbones: Could not find 'VAULT_NAMESPACE' in the environment, and 'BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE' was not specified!"
+    exit 1
+fi
+
+echo "--- :vault: Login to ${VAULT_ADDR}"
+echo "Using Docker image: ${image}"
+echo "VAULT_ADDR=${VAULT_ADDR}"
+echo "VAULT_NAMESPACE=${VAULT_NAMESPACE}"
+# TODO: add in the `header_value` as well
+
+VAULT_TOKEN=$(vault login -method=aws -token-only role="$(aws_auth_role)")
+
+# NOTE: Making this readonly somehow breaks the post-exit hook; the
+#       token is somehow missing.
+# readonly VAULT_TOKEN
+export VAULT_TOKEN

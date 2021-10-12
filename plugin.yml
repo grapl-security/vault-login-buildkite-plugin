@@ -1,0 +1,20 @@
+---
+name: Vault Login
+description: Log into a Hashicorp Vault server
+author: https://github.com/grapl-security
+requirements: ["docker"]
+configuration:
+  properties:
+    image:
+      description: The `vault` image to use; defaults to `hashicorp/vault`.
+      type: string
+    tag:
+      description: The `vault` image tag to use; defaults to `latest`
+      type: string
+    address:
+      description: The address of the Vault server to interact with. Should include protocol, server, and port (corresponds to 'VAULT_ADDR').
+      type: string
+    namespace:
+      description: The Vault namespace to interact with (corresponds to 'VAULT_NAMESPACE').
+      type: string
+  additionalProperties: false

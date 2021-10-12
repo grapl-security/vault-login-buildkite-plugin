@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# shellcheck source-path=SCRIPTDIR
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/vault.sh"
+
+if [ -n "${VAULT_TOKEN:-}" ]; then
+    echo "--- :vault: Revoking Vault token"
+    vault token revoke -self
+else
+    echo "--- :vault: No 'VAULT_TOKEN' found in the environment; skipping revocation"
+fi

@@ -1,0 +1,27 @@
+env:
+  PANTS_CONFIG_FILES: "['pants.toml', 'pants.ci.toml']"
+
+steps:
+  - label: ":lint-roller::bash: Lint Bash"
+    command:
+      - make lint-bash
+
+  - label: ":lint-roller::buildkite: Lint Plugin"
+    command:
+      - make lint-plugin
+
+  # TODO: Add some unit tests!
+  # - label: ":lint-roller::buildkite: Test Plugin"
+  #   command:
+  #     - make test-plugin
+
+  - label: ":buildkite::vault: Run Plugin - Login"
+    command: echo 'Hello World'
+    plugins:
+      # TODO: only because it's private now
+      - "ssh://git@github.com/grapl-security/vault-login-buildkite-plugin#${BUILDKITE_COMMIT}":
+          # These two can be set globally before the vault-login plugin is invoked
+          namespace: "admin/buildkite"
+          address: "https://vault-cluster.private.vault.b3b89729-5226-4b15-8c8a-b42572e88e7c.aws.hashicorp.cloud:8200"
+    agents:
+      queue: "docker/cm-testing"
