@@ -16,12 +16,23 @@ steps:
     command:
       - make lint-plugin
 
-  # TODO: Add some unit tests!
-  # - label: ":lint-roller::buildkite: Test Plugin"
-  #   command:
-  #     - make test-plugin
+  - label: ":bash: Unit Test Bash"
+    command:
+      - make test-bash
+    plugins:
+      - grapl-security/vault-login#v0.1.0
+      - grapl-security/vault-env#v0.1.0:
+          secrets:
+            - vault-login-buildkite-plugin/TOOLCHAIN_AUTH_TOKEN
 
-  - label: ":buildkite::vault: Run Plugin - Login"
-    command: echo 'Hello World'
+  - label: ":lint-roller::buildkite: Test Plugin"
+    command:
+      - make test-plugin
+
+  - label: ":buildkite::vault: Validate Plugin Behavior"
+    command:
+      - .buildkite/scripts/environment-hook-validation.sh
     plugins:
       - "grapl-security/vault-login#${BUILDKITE_COMMIT}":
+      - improbable-eng/metahook#v0.4.1:
+          pre-exit: .buildkite/scripts/pre-exit-hook-validation.sh
