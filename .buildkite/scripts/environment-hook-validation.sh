@@ -15,10 +15,9 @@ if [ -z "${VAULT_TOKEN}" ]; then
 fi
 
 # Just do something that we know we can do with the Vault token we've got.
-# TODO: Consider granting these tokens the ability to just run `vault
-# token lookup`
-# shellcheck disable=SC2034
-if ! token=$(vault kv get -field=TOOLCHAIN_AUTH_TOKEN secret/buildkite/env/vault-login-buildkite-plugin/TOOLCHAIN_AUTH_TOKEN); then
-    echo "Failed to use token to retrieve a secret!"
+if ! vault token lookup > /dev/null; then
+    echo "Failed to interact with Vault using VAULT_TOKEN!"
     exit 1
+else
+    echo "Successfully interacted with Vault using VAULT_TOKEN"
 fi
