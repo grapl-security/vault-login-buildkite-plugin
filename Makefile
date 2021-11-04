@@ -1,5 +1,7 @@
 COMPOSE_USER=$(shell id -u):$(shell id -g)
 
+.DEFAULT_GOAL=all
+
 # Linting
 ########################################################################
 
@@ -28,7 +30,11 @@ format-bash:
 ########################################################################
 
 .PHONY: test
-test: test-plugin
+test: test-bash test-plugin
+
+.PHONY: test-bash
+test-bash:
+	./pants test ::
 
 .PHONY: test-plugin
 test-plugin:
