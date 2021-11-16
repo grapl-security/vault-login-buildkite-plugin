@@ -40,7 +40,7 @@ teardown() {
     export VAULT_TOKEN="THIS_IS_A_PRETEND_VAULT_TOKEN"
 
     stub docker \
-         "run --init --rm --cap-add IPC_LOCK --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} --env=VAULT_TOKEN -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} token revoke -self : echo 'Success! Revoked token (if it existed)'"
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} --env=VAULT_TOKEN -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} token revoke -self : echo 'Success! Revoked token (if it existed)'"
 
     run "${PWD}/hooks/pre-exit"
 

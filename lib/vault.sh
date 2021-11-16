@@ -20,7 +20,12 @@ vault() {
     # account default values, overrides, etc.)
     #
     # Conditionally adding them also facilitates some unit testing.
-    env_args=()
+    #
+    # SKIP_SETCAP prevents the printing of an error message about not
+    # being able to add the IPC_LOCK capability... we don't need to
+    # grant this capability for our usecases, and we don't need to
+    # print that "scary" message in our Buildkite logs.
+    env_args=("--env=SKIP_SETCAP=true")
 
     if [ -n "${VAULT_ADDR:-}" ]; then
         env_args+=("--env=VAULT_ADDR=${VAULT_ADDR}")
@@ -59,7 +64,6 @@ vault() {
     docker run \
         --init \
         --rm \
-        --cap-add IPC_LOCK \
         ${env_args[@]+"${env_args[@]}"} \
         -- \
         "${image}" "$@"
