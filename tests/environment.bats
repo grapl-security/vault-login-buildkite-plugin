@@ -34,7 +34,7 @@ teardown() {
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE
 
     stub docker \
-         "run --init --rm --cap-add IPC_LOCK --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
 
     run "${PWD}/hooks/environment"
     assert_success
@@ -46,7 +46,7 @@ teardown() {
     export BUILDKITE_PLUGIN_VAULT_LOGIN_ADDRESS=override.vault.mycompany.com:8200
 
     stub docker \
-         "run --init --rm --cap-add IPC_LOCK --env=VAULT_ADDR=override.vault.mycompany.com:8200 --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=override.vault.mycompany.com:8200 --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
 
     run "${PWD}/hooks/environment"
     assert_success
@@ -69,7 +69,7 @@ teardown() {
     export BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE=override_namespace
 
     stub docker \
-         "run --init --rm --cap-add IPC_LOCK --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=override_namespace -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=override_namespace -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
 
     run "${PWD}/hooks/environment"
     assert_success
@@ -91,7 +91,7 @@ teardown() {
     export BUILDKITE_PLUGIN_VAULT_LOGIN_IMAGE=mycompany/vault
 
     stub docker \
-         "run --init --rm --cap-add IPC_LOCK --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- mycompany/vault:${DEFAULT_TAG} login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- mycompany/vault:${DEFAULT_TAG} login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
 
     run "${PWD}/hooks/environment"
     assert_success
@@ -103,7 +103,7 @@ teardown() {
     export BUILDKITE_PLUGIN_VAULT_LOGIN_TAG=v1.2.3
 
     stub docker \
-         "run --init --rm --cap-add IPC_LOCK --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:v1.2.3 login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:v1.2.3 login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
 
     run "${PWD}/hooks/environment"
     assert_success
@@ -116,7 +116,7 @@ teardown() {
     export BUILDKITE_PLUGIN_VAULT_LOGIN_TAG=v1.2.3
 
     stub docker \
-         "run --init --rm --cap-add IPC_LOCK --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- mycompany/vault:v1.2.3 login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- mycompany/vault:v1.2.3 login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
 
     run "${PWD}/hooks/environment"
     assert_success
@@ -128,7 +128,7 @@ teardown() {
     export BUILDKITE_AGENT_META_DATA_QUEUE=default/testing
 
     stub docker \
-         "run --init --rm --cap-add IPC_LOCK --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default-testing : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default-testing : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
 
     run "${PWD}/hooks/environment"
     assert_success
