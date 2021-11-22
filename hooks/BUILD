@@ -1,6 +1,1 @@
-shell_library(
-    sources=[
-        "environment",
-        "pre-exit"
-    ]
-)
+shell_sources(sources=["environment", "pre-exit"])
