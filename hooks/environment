@@ -7,8 +7,16 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib/vault.sh"
 
 # Our roles in Vault map to our queue names. We need to tweak it a
 # bit, though, in order to obey Vault's naming rules.
+
+# Our roles in Vault map roughly to our Buildkite queues, but we must
+# account for their different names in our different Pulumi
+# stacks. "production" stack queues just use their regular name (e.g.,
+# "default", while other stack's queues are modified with their stack
+# name, e.g. "default/testing".
+#
+# We need to chop off the `/` and anything that follows.
 aws_auth_role() {
-    tr '/' '-' <<< "${BUILDKITE_AGENT_META_DATA_QUEUE}"
+    awk 'BEGIN { FS = "/"}; {print $1}' <<< "${BUILDKITE_AGENT_META_DATA_QUEUE}"
 }
 
 # Resolve Vault address

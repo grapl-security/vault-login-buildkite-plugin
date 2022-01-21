@@ -129,7 +129,7 @@ teardown() {
     export BUILDKITE_AGENT_META_DATA_QUEUE=default/testing
 
     stub docker \
-         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default-testing : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
 
     run "${PWD}/hooks/environment"
     assert_success
