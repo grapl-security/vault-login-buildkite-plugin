@@ -5,6 +5,12 @@ author: https://github.com/grapl-security
 requirements: ["docker"]
 configuration:
   properties:
+    auth_role:
+      description: |
+        The name of the authentication role to use. If not specified,
+        internal (Grapl-specific) logic will be used to generate a
+        role name from the Buildkite agent queue name.
+      type: string
     image:
       description: The `vault` image to use; defaults to `hashicorp/vault`.
       type: string
