@@ -33,13 +33,21 @@ if [ -z "${VAULT_NAMESPACE:-}" ]; then
     exit 1
 fi
 
+# Resolve Authentication Role
+########################################################################
+if [ -n "${BUILDKITE_PLUGIN_VAULT_LOGIN_AUTH_ROLE:-}" ]; then
+    vault_authentication_role="${BUILDKITE_PLUGIN_VAULT_LOGIN_AUTH_ROLE}"
+else
+    vault_authentication_role="$(aws_auth_role)"
+fi
+
 echo "--- :vault: Login to ${VAULT_ADDR}"
 echo "Using Docker image: ${image}"
 echo "VAULT_ADDR=${VAULT_ADDR}"
 echo "VAULT_NAMESPACE=${VAULT_NAMESPACE}"
 # TODO: add in the `header_value` as well
 
-VAULT_TOKEN=$(vault login -method=aws -token-only role="$(aws_auth_role)")
+VAULT_TOKEN=$(vault login -method=aws -token-only role="${vault_authentication_role}")
 
 # NOTE: Making this readonly somehow breaks the post-exit hook; the
 #       token is somehow missing.

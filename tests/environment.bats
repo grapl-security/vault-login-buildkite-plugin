@@ -18,13 +18,14 @@ setup() {
 }
 
 teardown() {
-    unset VAULT_ADDR
-    unset VAULT_NAMESPACE
     unset BUILDKITE_AGENT_META_DATA_QUEUE
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_ADDRESS
-    unset BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE
+    unset BUILDKITE_PLUGIN_VAULT_LOGIN_AUTH_ROLE
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_IMAGE
+    unset BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_TAG
+    unset VAULT_ADDR
+    unset VAULT_NAMESPACE
 }
 
 @test "VAULT_ADDR and VAULT_NAMESPACE are accepted in the absence of explicit overrides" {
@@ -135,4 +136,17 @@ teardown() {
 
     unstub docker
 
+}
+
+@test "Overriding the authentication role takes priority" {
+    export BUILDKITE_AGENT_META_DATA_QUEUE=default/testing
+    export BUILDKITE_PLUGIN_VAULT_LOGIN_AUTH_ROLE=monkeypants
+
+    stub docker \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=monkeypants : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
+
+    run "${PWD}/hooks/environment"
+    assert_success
+
+    unstub docker
 }
