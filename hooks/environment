@@ -3,6 +3,8 @@
 set -euo pipefail
 
 # shellcheck source-path=SCRIPTDIR
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/log.sh"
+# shellcheck source-path=SCRIPTDIR
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/vault.sh"
 
 # Our roles in Vault map to our queue names. We need to tweak it a
@@ -26,8 +28,7 @@ if [ -n "${BUILDKITE_PLUGIN_VAULT_LOGIN_ADDRESS:-}" ]; then
     export VAULT_ADDR
 fi
 if [ -z "${VAULT_ADDR:-}" ]; then
-    echo "--- :skull_and_crossbones: Could not find 'VAULT_ADDR' in the environment, and 'BUILDKITE_PLUGIN_VAULT_LOGIN_ADDRESS' was not specified!"
-    exit 1
+    raise_error "Could not find 'VAULT_ADDR' in the environment, and 'BUILDKITE_PLUGIN_VAULT_LOGIN_ADDRESS' was not specified!"
 fi
 
 # Resolve Vault namespace
@@ -37,8 +38,7 @@ if [ -n "${BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE:-}" ]; then
     export VAULT_NAMESPACE
 fi
 if [ -z "${VAULT_NAMESPACE:-}" ]; then
-    echo "--- :skull_and_crossbones: Could not find 'VAULT_NAMESPACE' in the environment, and 'BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE' was not specified!"
-    exit 1
+    raise_error "Could not find 'VAULT_NAMESPACE' in the environment, and 'BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE' was not specified!"
 fi
 
 # Resolve Authentication Role
@@ -55,7 +55,7 @@ echo "VAULT_ADDR=${VAULT_ADDR}"
 echo "VAULT_NAMESPACE=${VAULT_NAMESPACE}"
 # TODO: add in the `header_value` as well
 
-VAULT_TOKEN=$(vault login -method=aws -token-only role="${vault_authentication_role}")
+VAULT_TOKEN=$(log_and_run vault login -method=aws -token-only role="${vault_authentication_role}")
 
 # NOTE: Making this readonly somehow breaks the post-exit hook; the
 #       token is somehow missing.
