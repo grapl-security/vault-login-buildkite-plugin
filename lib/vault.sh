@@ -48,23 +48,10 @@ vault() {
     # command, as well as getting embedded ANSI codes, which can cause
     # subsequent Vault commands to fail (Vault doesn't like ANSI codes
     # in its tokens, for instance).
-
-    # NOTE: The particularly ugly expansion of `env_args` here is to work
-    # around the fact that we currently have Bash 4.2 on our Buildkite
-    # agents, where expanding empty arrays in the presence of `set -u`
-    # will raise an unbound variable error. With Bash 4.4+, this is no
-    # longer the case, allowing us to use the more sensible
-    # "${env_args[@]}"
-    #
-    # See the following for further background (most concretely, the
-    # final link):
-    # - https://stackoverflow.com/a/61551944
-    # - https://gist.github.com/dimo414/2fb052d230654cc0c25e9e41a9651ebe
-    # - https://git.savannah.gnu.org/cgit/bash.git/tree/CHANGES?id=3ba697465bc74fab513a26dea700cc82e9f4724e#n878
     docker run \
         --init \
         --rm \
-        ${env_args[@]+"${env_args[@]}"} \
+        "${env_args[@]}" \
         -- \
         "${image}" "$@"
 }
