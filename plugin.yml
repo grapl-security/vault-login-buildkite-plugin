@@ -2,7 +2,8 @@
 name: Vault Login
 description: Log into a Hashicorp Vault server
 author: https://github.com/grapl-security
-requirements: ["docker"]
+requirements:
+  - "docker"
 configuration:
   properties:
     auth_role:
@@ -19,6 +20,15 @@ configuration:
       description: |
         The `vault` image tag to use; defaults to `latest`.
       type: string
+    always-pull:
+      description: |
+        Explicitly pull the image before running. Useful if using the
+        `latest` tag. Defaults to `false`.
+
+        Note that "true", "on", and "1" are all acceptable values to
+        enable this option. Any other value is considered synonymous
+        with `false`.
+      type: boolean
     address:
       description: |
         The address of the Vault server to interact with. Should

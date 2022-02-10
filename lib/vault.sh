@@ -2,11 +2,25 @@
 
 set -euo pipefail
 
+# shellcheck source-path=SCRIPTDIR
+source "$(dirname "${BASH_SOURCE[0]}")/log.sh"
+
 readonly default_image="hashicorp/vault"
 readonly default_tag="latest"
 # TODO: add a "debug" mode where we spit out the specific image and
 # commands being used
 readonly image="${BUILDKITE_PLUGIN_VAULT_LOGIN_IMAGE:-${default_image}}:${BUILDKITE_PLUGIN_VAULT_LOGIN_TAG:-${default_tag}}"
+
+maybe_pull_image() {
+    # We match against the value true / on / 1, rather than simply
+    # checking whether it is set or not, to make it possible to set a
+    # value globally via the environment, but still allow for
+    # job-specific overrides.
+    if [[ "${BUILDKITE_PLUGIN_VAULT_LOGIN_ALWAYS_PULL:-false}" =~ ^(true|on|1)$ ]]; then
+        echo ":docker: Explicitly pulling '${image}' image"
+        log_and_run docker pull "${image}"
+    fi
+}
 
 # Wrap up the invocation of a Vault container image to alleviate the
 # need to have a Vault binary installed on the Buildkite agent machine

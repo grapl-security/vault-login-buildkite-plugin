@@ -40,3 +40,12 @@ steps:
       - "grapl-security/vault-login#${BUILDKITE_COMMIT}":
       - improbable-eng/metahook#v0.4.1:
           pre-exit: .buildkite/scripts/pre-exit-hook-validation.sh
+
+  - label: ":buildkite::vault: Validate Plugin Behavior with pull"
+    command:
+      - .buildkite/scripts/environment-hook-validation.sh
+    plugins:
+      - "grapl-security/vault-login#${BUILDKITE_COMMIT}":
+          always-pull: true
+      - improbable-eng/metahook#v0.4.1:
+          pre-exit: .buildkite/scripts/pre-exit-hook-validation.sh

@@ -20,6 +20,7 @@ setup() {
 teardown() {
     unset BUILDKITE_AGENT_META_DATA_QUEUE
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_ADDRESS
+    unset BUILDKITE_PLUGIN_VAULT_LOGIN_ALWAYS_PULL
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_AUTH_ROLE
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_IMAGE
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE
@@ -244,4 +245,17 @@ teardown() {
     assert_failure
 
     assert_output --partial "Must provide a positive value for attempt_wait_seconds!"
+}
+
+@test "always-pull will pull an image before running" {
+    export BUILDKITE_PLUGIN_VAULT_LOGIN_ALWAYS_PULL=1
+
+    stub docker \
+         "pull ${DEFAULT_IMAGE}:${DEFAULT_TAG} : echo 'pulling image'" \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
+
+    run "${PWD}/hooks/environment"
+    assert_success
+
+    unstub docker
 }

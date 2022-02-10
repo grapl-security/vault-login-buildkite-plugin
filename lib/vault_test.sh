@@ -36,3 +36,25 @@ test_vault_stdout_contains_no_ANSI_codes() {
         "${output}" \
         "${expanded_output}"
 }
+
+test_explicit_pull() {
+    output="$(BUILDKITE_PLUGIN_VAULT_LOGIN_ALWAYS_PULL=1 maybe_pull_image)"
+    assertContains "${output}" "latest: Pulling from hashicorp/vault"
+}
+
+test_no_explicit_pull() {
+    output="$(
+        unset BUILDKITE_PLUGIN_VAULT_LOGIN_ALWAYS_PULL
+        maybe_pull_image
+    )"
+    assertEquals "" "${output}"
+}
+
+test_synonyms_for_always_pull_activation() {
+    for value in "true" "on" "1"; do
+        output="$(BUILDKITE_PLUGIN_VAULT_LOGIN_ALWAYS_PULL=${value} maybe_pull_image)"
+        assertContains "Expected '${value}' to enable 'always-pull' option" \
+            "${output}" \
+            "latest: Pulling from hashicorp/vault"
+    done
+}
