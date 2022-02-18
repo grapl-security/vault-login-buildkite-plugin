@@ -96,9 +96,8 @@ Buildkite agent queue name.
 
 ### `image` (optional, string)
 
-The container image with the Codecov Uploader binary that the plugin
-uses. Any container used should have the `codecov` binary as its
-entrypoint.
+The container image with the `vault` binary that the plugin uses. Any
+container used should have the `vault` binary as its entrypoint.
 
 Defaults to `hashicorp/vault`.
 
