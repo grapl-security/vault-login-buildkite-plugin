@@ -64,6 +64,22 @@ steps:
           auth_role: super_special_auth_role
 ```
 
+Failed attempts to login can be retried, which comes in handy if you
+experience transient network issues. By default, the plugin attempts 3
+times, waiting 5 seconds between each attempt, but these values are
+both configurable:
+
+```yml
+steps:
+  - command: make test
+    plugins:
+      - grapl-security/vault-login#v0.1.1:
+          attempt_count: 5
+          attempt_wait_seconds: 10
+```
+
+Setting `attempt_count` to `1` effectively disables the retry logic.
+
 ## Configuration
 
 ### `address` (optional, string)
@@ -97,6 +113,21 @@ either, the plugin fails with an error.
 The container image tag the plugin uses.
 
 Defaults to `latest`.
+
+### `attempt_count` (optional, integer)
+
+The number of times to attempt to login to Vault before giving
+up.
+
+Defaults to `3`.
+
+You can disable retries by setting this to `1`.
+
+### `attempt_wait_seconds` (optional, integer)
+
+The number of seconds to wait between each retry attempt.
+
+Defaults to `5`.
 
 ## Building
 

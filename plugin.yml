@@ -12,15 +12,32 @@ configuration:
         role name from the Buildkite agent queue name.
       type: string
     image:
-      description: The `vault` image to use; defaults to `hashicorp/vault`.
+      description: |
+        The `vault` image to use; defaults to `hashicorp/vault`.
       type: string
     tag:
-      description: The `vault` image tag to use; defaults to `latest`
+      description: |
+        The `vault` image tag to use; defaults to `latest`.
       type: string
     address:
-      description: The address of the Vault server to interact with. Should include protocol, server, and port (corresponds to 'VAULT_ADDR').
+      description: |
+        The address of the Vault server to interact with. Should
+        include protocol, server, and port (corresponds to
+        'VAULT_ADDR').
       type: string
     namespace:
-      description: The Vault namespace to interact with (corresponds to 'VAULT_NAMESPACE').
+      description: |
+        The Vault namespace to interact with (corresponds to
+        'VAULT_NAMESPACE').
       type: string
-  additionalProperties: false
+    attempt_count:
+      description: |
+        The number of times to attempt to login to Vault before giving
+        up. Defaults to 3.
+      type: integer
+    attempt_wait_seconds:
+      description: |
+        The number of seconds to wait between each retry
+        attempt. Defaults to 5.
+      type: integer
+    additionalProperties: false

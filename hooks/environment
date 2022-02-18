@@ -49,13 +49,51 @@ else
     vault_authentication_role="$(aws_auth_role)"
 fi
 
+# Resolve Retry Configuration
+########################################################################
+readonly default_attempt_count=3
+readonly attempt_count="${BUILDKITE_PLUGIN_VAULT_LOGIN_ATTEMPT_COUNT:-${default_attempt_count}}"
+
+readonly default_attempt_wait_seconds=5
+readonly attempt_wait_seconds="${BUILDKITE_PLUGIN_VAULT_LOGIN_ATTEMPT_WAIT_SECONDS:-${default_attempt_wait_seconds}}"
+
+if (("${attempt_count}" < 1)); then
+    raise_error "Must provide a positive value for attempt_count!"
+fi
+
+if (("${attempt_wait_seconds}" < 1)); then
+    raise_error "Must provide a positive value for attempt_wait_seconds!"
+fi
+
 echo "--- :vault: Login to ${VAULT_ADDR}"
 echo "Using Docker image: ${image}"
 echo "VAULT_ADDR=${VAULT_ADDR}"
 echo "VAULT_NAMESPACE=${VAULT_NAMESPACE}"
 # TODO: add in the `header_value` as well
 
-VAULT_TOKEN=$(log_and_run vault login -method=aws -token-only role="${vault_authentication_role}")
+for i in $(seq 1 "${attempt_count}"); do
+    if ! VAULT_TOKEN="$(log_and_run vault login -method=aws -token-only role="${vault_authentication_role}")"; then
+        if [ "${i}" = "${attempt_count}" ]; then
+            if (("${attempt_count}" == 1)); then
+                # Because "Failed to login 1 times!" is silly
+                raise_error "Failed to login!"
+            else
+                raise_error "Failed to login ${attempt_count} times!"
+            fi
+        else
+            if (("${attempt_wait_seconds}" == 1)); then
+                # Because "will try again in 1 seconds" is silly
+                units="second"
+            else
+                units="seconds"
+            fi
+            log "Failed login attempt ${i}/${attempt_count}; will try again in ${attempt_wait_seconds} ${units}"
+            sleep "${attempt_wait_seconds}"
+        fi
+    else
+        break
+    fi
+done
 
 # NOTE: Making this readonly somehow breaks the post-exit hook; the
 #       token is somehow missing.

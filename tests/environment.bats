@@ -23,6 +23,8 @@ teardown() {
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_AUTH_ROLE
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_IMAGE
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_NAMESPACE
+    unset BUILDKITE_PLUGIN_VAULT_LOGIN_ATTEMPT_COUNT
+    unset BUILDKITE_PLUGIN_VAULT_LOGIN_ATTEMPT_WAIT_SECONDS
     unset BUILDKITE_PLUGIN_VAULT_LOGIN_TAG
     unset VAULT_ADDR
     unset VAULT_NAMESPACE
@@ -149,4 +151,97 @@ teardown() {
     assert_success
 
     unstub docker
+}
+
+@test "Multiple login attempts work" {
+    stub docker \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : exit 1" \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : exit 2" \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : echo 'THIS_IS_YOUR_VAULT_TOKEN'"
+
+    run "${PWD}/hooks/environment"
+    assert_success
+
+    assert_output --partial "Failed login attempt 1/3; will try again in 5 seconds"
+    assert_output --partial "Failed login attempt 2/3; will try again in 5 seconds"
+    refute_output --partial "Failed to login 3 times!"
+
+    unstub docker
+}
+
+@test "Exhausting all login attempts fails" {
+    # Waiting 5 seconds during tests sucks
+    export BUILDKITE_PLUGIN_VAULT_LOGIN_ATTEMPT_WAIT_SECONDS=1
+
+    stub docker \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : exit 3" \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : exit 4" \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : exit 5"
+
+    run "${PWD}/hooks/environment"
+    assert_failure
+
+    assert_output --partial "Failed login attempt 1/3; will try again in 1 second"
+    assert_output --partial "Failed login attempt 2/3; will try again in 1 second"
+    assert_output --partial "Failed to login 3 times!"
+
+    unstub docker
+}
+
+@test "attempt count can be modified" {
+    # Waiting 5 seconds during tests sucks
+    export BUILDKITE_PLUGIN_VAULT_LOGIN_ATTEMPT_WAIT_SECONDS=1
+    export BUILDKITE_PLUGIN_VAULT_LOGIN_ATTEMPT_COUNT=5
+
+    stub docker \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : exit 6" \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : exit 7" \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : exit 8" \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : exit 9" \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : exit 10"
+
+    run "${PWD}/hooks/environment"
+    assert_failure
+
+    assert_output --partial "Failed login attempt 1/5; will try again in 1 second"
+    assert_output --partial "Failed login attempt 2/5; will try again in 1 second"
+    assert_output --partial "Failed login attempt 3/5; will try again in 1 second"
+    assert_output --partial "Failed login attempt 4/5; will try again in 1 second"
+    assert_output --partial "Failed to login 5 times!"
+
+    unstub docker
+}
+
+@test "Failure message respects a attempt count of 1" {
+    # Waiting 5 seconds during tests sucks
+    export BUILDKITE_PLUGIN_VAULT_LOGIN_ATTEMPT_WAIT_SECONDS=1
+    export BUILDKITE_PLUGIN_VAULT_LOGIN_ATTEMPT_COUNT=1
+
+    stub docker \
+         "run --init --rm --env=SKIP_SETCAP=true --env=VAULT_ADDR=${VAULT_ADDR} --env=VAULT_NAMESPACE=${VAULT_NAMESPACE} -- ${DEFAULT_IMAGE}:${DEFAULT_TAG} login -method=aws -token-only role=default : exit 11"
+
+    run "${PWD}/hooks/environment"
+    assert_failure
+
+    assert_output --partial "Failed to login!"
+
+    unstub docker
+}
+
+@test "attempt count must be positive" {
+    export BUILDKITE_PLUGIN_VAULT_LOGIN_ATTEMPT_COUNT=0
+
+    run "${PWD}/hooks/environment"
+    assert_failure
+
+    assert_output --partial "Must provide a positive value for attempt_count!"
+}
+
+@test "attempt wait seconds must be positive" {
+    export BUILDKITE_PLUGIN_VAULT_LOGIN_ATTEMPT_WAIT_SECONDS=0
+
+    run "${PWD}/hooks/environment"
+    assert_failure
+
+    assert_output --partial "Must provide a positive value for attempt_wait_seconds!"
 }
