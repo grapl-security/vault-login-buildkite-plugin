@@ -1,4 +1,4 @@
-COMPOSE_USER=$(shell id -u):$(shell id -g)
+DOCKER_COMPOSE_CHECK := docker compose run --rm
 
 .DEFAULT_GOAL=all
 
@@ -10,7 +10,7 @@ lint: lint-plugin lint-shell
 
 .PHONY: lint-plugin
 lint-plugin:
-	docker-compose run --rm plugin-linter
+	$(DOCKER_COMPOSE_CHECK) plugin-linter
 
 .PHONY: lint-shell
 lint-shell:
@@ -38,7 +38,7 @@ test-shell:
 
 .PHONY: test-plugin
 test-plugin:
-	docker-compose run --rm plugin-tester
+	$(DOCKER_COMPOSE_CHECK) plugin-tester
 
 .PHONY: all
 all: format lint test
