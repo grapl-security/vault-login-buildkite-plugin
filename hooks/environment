@@ -65,6 +65,8 @@ if (("${attempt_wait_seconds}" < 1)); then
     raise_error "Must provide a positive value for attempt_wait_seconds!"
 fi
 
+maybe_pull_image
+
 echo "--- :vault: Login to ${VAULT_ADDR}"
 echo "Using Docker image: ${image}"
 echo "VAULT_ADDR=${VAULT_ADDR}"

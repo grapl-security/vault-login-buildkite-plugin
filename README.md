@@ -82,38 +82,29 @@ Setting `attempt_count` to `1` effectively disables the retry logic.
 
 ## Configuration
 
-### `address` (optional, string)
+### `vault` Flags
+
+#### `address` (optional, string)
 
 The address of the Vault server to access. If not set, falls back to
 `VAULT_ADDR` in the environment. If `VAULT_ADDR` is not set either,
 the plugin fails with an error.
 
-### `auth_role` (optional, string)
+#### `auth_role` (optional, string)
 
 The name of the Vault AWS role to authenticate as. If not specified,
 uses (Grapl-specific) logic to generate the role name from the
 Buildkite agent queue name.
 
-### `image` (optional, string)
-
-The container image with the `vault` binary that the plugin uses. Any
-container used should have the `vault` binary as its entrypoint.
-
-Defaults to `hashicorp/vault`.
-
-### `namespace` (optional, string)
+#### `namespace` (optional, string)
 
 The Vault namespace to access. If not set, falls back to
 `VAULT_NAMESPACE` in the environment. If `VAULT_NAMESPACE` is not set
 either, the plugin fails with an error.
 
-### `tag` (optional, string)
+### Retry Configuration
 
-The container image tag the plugin uses.
-
-Defaults to `latest`.
-
-### `attempt_count` (optional, integer)
+#### `attempt_count` (optional, integer)
 
 The number of times to attempt to login to Vault before giving
 up.
@@ -122,11 +113,34 @@ Defaults to `3`.
 
 You can disable retries by setting this to `1`.
 
-### `attempt_wait_seconds` (optional, integer)
+#### `attempt_wait_seconds` (optional, integer)
 
 The number of seconds to wait between each retry attempt.
 
 Defaults to `5`.
+
+### Container Image Configuration
+
+#### `image` (optional, string)
+
+The container image with the `vault` binary that the plugin uses. Any
+container used should have the `vault` binary as its entrypoint.
+
+Defaults to `hashicorp/vault`.
+
+#### `tag` (optional, string)
+
+The container image tag the plugin uses.
+
+Defaults to `latest`.
+
+#### `always_pull` (optional, boolean)
+
+Whether or not to perform an explicit `docker pull` of the configured
+image before running. Useful when using the `latest` tag to ensure you
+are always using the _actual_ latest image.
+
+Defaults to `false`.
 
 ## Building
 
