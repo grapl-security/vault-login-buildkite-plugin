@@ -69,6 +69,10 @@ maybe_pull_image
 
 echo "--- :vault: Login to ${VAULT_ADDR}"
 echo "Using Docker image: ${image}"
+echo "Image ID: $(docker inspect "${image}" --format="{{ index .RepoDigests 0 }}")"
+# Don't bother with a `log_and_run` here; it would just clutter up
+# this information display
+echo "Vault Version: $(vault --version)"
 echo "VAULT_ADDR=${VAULT_ADDR}"
 echo "VAULT_NAMESPACE=${VAULT_NAMESPACE}"
 # TODO: add in the `header_value` as well
