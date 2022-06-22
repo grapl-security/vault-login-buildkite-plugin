@@ -37,7 +37,7 @@ across your pipelines):
 steps:
   - command: make test
     plugins:
-      - grapl-security/vault-login#v0.1.2
+      - grapl-security/vault-login#v0.1.3
 ```
 
 You can override many of the built-in defaults, or be very explicit:
@@ -46,7 +46,7 @@ You can override many of the built-in defaults, or be very explicit:
 steps:
   - command: make test
     plugins:
-      - grapl-security/vault-login#v0.1.2:
+      - grapl-security/vault-login#v0.1.3:
           image: vault
           tag: 1.8.4
           address: https://vault.mycompany.com:8200
@@ -60,7 +60,7 @@ role name from the Buildkite queue name if you really need to:
 steps:
   - command: make test
     plugins:
-      - grapl-security/vault-login#v0.1.2:
+      - grapl-security/vault-login#v0.1.3:
           auth_role: super_special_auth_role
 ```
 
@@ -73,7 +73,7 @@ both configurable:
 steps:
   - command: make test
     plugins:
-      - grapl-security/vault-login#v0.1.2:
+      - grapl-security/vault-login#v0.1.3:
           attempt_count: 5
           attempt_wait_seconds: 10
 ```
